@@ -1,0 +1,29 @@
+.sucess-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #81C784;
+    color: black;
+    padding: 15px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    z-index: 200;
+}
+
+.sucess-message {
+    margin-right: 30px;
+}
+
+.sucess-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#icone-fechar-message {
+    font-size: 17px;
+}

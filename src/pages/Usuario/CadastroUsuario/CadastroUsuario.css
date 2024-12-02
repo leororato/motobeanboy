@@ -1,0 +1,218 @@
+/* CADASTRO USUARIO */
+.container-cadastro-usuario {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5%;
+}
+
+.itens-cadastro-usuario {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    background-color: #eeede8;
+    padding: 50px 100px 60px 100px;
+    border: 1px solid #a09d9da9;
+    border-radius: 4px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    margin-top: 150px;
+}
+
+.container-form-cadastro-usuario {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 20px;
+    gap: 40px;
+}
+
+.container-form-cadastro-usuario input,
+.container-form-cadastro-usuario select {
+    border: none;
+    border-radius: 5px;
+    background-color: #ffffffe8;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.container-form-cadastro-usuario select {
+    padding: 10px;
+}
+
+.container-form-cadastro-usuario option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+#titulo-cadastro-usuario {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+#box-item-input {
+    display: flex;
+    flex-direction: column;
+}
+
+#box-item-input input {
+    padding: 10px 10px 10px 10px;
+
+}
+
+#box-select-cadastro-user {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-password {
+    width: 100%;
+    padding: 10px 0px 10px 10px;
+}
+
+.icon-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.icon-password:hover {
+    color: #333;
+}
+
+
+.buttons-criar-novo-usuario {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 50px;
+}
+
+#botao-criar-usuario button {
+    background-color: #30985A;
+    border-radius: 3px;
+    padding: 10px;
+    width: 120px;
+    font-size: large;
+    transition: 1s ease;
+}
+
+#botao-criar-usuario button:hover {
+    background-color: #0D6530;
+}
+
+#botao-cancelar-criar-usuario button {
+    background-color: transparent;
+    color: black !important;
+    border-radius: 3px;
+    padding: 10px;
+    width: 120px;
+    font-size: large;
+    border: 1px solid #686868 !important;
+    transition: 1s ease;
+}
+
+#botao-cancelar-criar-usuario button:hover {
+    background-color: #ccc;
+    color: white;
+}
+
+/* LISTAGEM USUARIOS */
+
+.ul-lista-usuarios {
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 100px;
+    margin-bottom: 200px;
+}
+
+.ul-lista-usuarios li {
+    grid-template-columns: repeat(6, 1fr);
+    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+.busca-usuario-input {
+    padding-left: 40px;
+}
+
+.busca-usuario-input input {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#header-lista-usuarios {
+    background-color: #1780e2;
+    color: white;
+}
+
+.lista-user-1 {
+    color: black;
+}
+
+.lista-user-1 div {
+    border-right: 1px solid #ddd;
+    padding: 10px;
+}
+
+.lista-user-1-sem-cor {
+    background-color: #FFFFFF;
+}
+
+.lista-user-1-com-cor {
+    background-color: #dddddda2;
+}
+
+
+#header-lista-usuarios,
+.lista-user-1 {
+    display: grid;
+    border-top: none;
+    font-weight: bold;
+    text-align: center;
+}
+
+#header-lista-usuarios div {
+    padding: 10px;
+    border-right: 1px solid #ddd;
+}
+
+#header-lista-usuarios div:last-child {
+    border-right: none
+}
+
+.lista-user-1 {
+    transition: 0.5ms ease-in;
+}
+
+.lista-user-1:hover {
+    background-color: #dddddda2;
+}
+
+#nao-existe-usuario {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#nao-existe-usuario li {
+    list-style: none;
+}
