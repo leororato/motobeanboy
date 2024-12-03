@@ -101,6 +101,9 @@ const Header = () => {
                     <div id="header-menu-itens" onClick={() => navigate('/cadastrar-cidade')}>
                         <Text text={'Cadastrar cidade'}  />
                     </div>
+                    <div id="header-menu-itens" onClick={() => navigate('/cadastrar-locais-servico')}>
+                        <Text text={'Cadastrar locais serviço'}  />
+                    </div>
                 </div>
             )}
 

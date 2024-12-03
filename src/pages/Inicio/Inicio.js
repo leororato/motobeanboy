@@ -10,6 +10,7 @@ import Header from '../../components/Header/Header';
 import api from '../../axiosConfig';
 import ErrorNotification from '../../components/ErrorNotification/ErrorNotification';
 import SucessNotification from '../../components/SucessNotification/SucessNotification';
+import Loading from '../../components/Loading/Loading';
 
 // Corrigir o ícone padrão do Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,14 +22,21 @@ L.Icon.Default.mergeOptions({
 
 function Inicio() {
 
-  const [cidadeDigitada, setCidadeDigitada] = useState("");
+  const [contextLoading, setContextLoading] = useState(false);
+  const [estadoDaPagina, setEstadoDaPagina] = useState("Carregando");
+
+  const [cidadeSelecionada, setCidadeSelecionada] = useState("");
   const [posicaoSelecionada, setPosicaoSelecionada] = useState(null);
   const [enderecoPelaApi, setEnderecoPelaApi] = useState("");
   const [enderecoDigitado, setEnderecoDigitado] = useState("");
   const [enderecoInput, setEnderecoInput] = useState("");
   const [numeroDaCasa, setNumeroDaCasa] = useState("");
 
+  const [locais, setLocais] = useState([]);
+
   const [tiposDeVeiculo, setTiposDeVeiculo] = useState([]);
+  const [cidades, setCidades] = useState([]);
+
   const [errorMessage, setErrorMessage] = useState("");
   const [sucessMessage, setSucessMessage] = useState("");
 
@@ -36,7 +44,34 @@ function Inicio() {
     try {
       const response = await api.get("/tipo-veiculo/todos");
       setTiposDeVeiculo(response.data);
-      console.log('resp: ', response.data)
+
+    } catch (error) {
+      const errorMessage = error.response?.data || "Erro desconhecido ao criar usuário";
+      setErrorMessage(errorMessage);
+    }
+  }
+
+  const buscarLocaisExistentes = async () => {
+    setContextLoading(true);
+    setEstadoDaPagina("Carregando");
+
+    try {
+      const response = await api.get("/local-servico/buscar-todos-locais");
+      setLocais(response.data);
+      console.log('locais: ', response.data)
+    } catch (error) {
+      const errorMessage = error.response?.data || "Erro desconhecido ao buscar locais";
+      setErrorMessage(errorMessage);
+    } finally {
+      setContextLoading(false);
+    }
+  }
+
+  const buscarCidades = async () => {
+    try {
+
+      const response = await api.get("/cidade/buscar-todas-order-by-nome")
+      setCidades(response.data);
 
     } catch (error) {
       const errorMessage = error.response?.data || "Erro desconhecido ao criar usuário";
@@ -46,15 +81,16 @@ function Inicio() {
 
   useEffect(() => {
     buscarTiposDeVeiculo();
+    buscarCidades();
+    buscarLocaisExistentes();
   }, [])
 
   // Função para remover o marcador
   const removerMarcador = () => {
-    setPosicaoSelecionada(null); // Remove a posição do marcador
-    setEnderecoPelaApi(""); // Limpa o endereço
+    setPosicaoSelecionada(null);
+    setEnderecoPelaApi("");
     setEnderecoDigitado("");
   };
-
 
 
   // Função para buscar o nome da rua usando geocodificação reversa (Nominatim)
@@ -86,21 +122,19 @@ function Inicio() {
     }
   };
 
-  // Componente para capturar clique no mapa
   function ValorDoMarcador() {
-
     const map = useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng;
         setPosicaoSelecionada(e.latlng); // Pega a latitude e longitude
-        console.log(e.latlng)
+
         // Busca o nome da rua com base na posição clicada
         getEnderecoPorLatELong(lat, lng).then(({ road, state, country }) => {
-          // Desestrutura o objeto retornado
           setEnderecoPelaApi(road + ", " + state + ", " + country); // Atualiza o estado com o nome da rua
           setEnderecoDigitado(road + ", " + state + ", " + country);
-          // Move a visualização para o local clicado e abre o popup imediatamente
-          map.flyTo(e.latlng, map.getZoom());
+
+          // Aqui, usamos o método flyTo para ajustar o mapa e o zoom automaticamente
+          map.flyTo(e.latlng, 18); // Você pode ajustar o nível de zoom conforme necessário (18 é um valor alto)
         });
       },
     });
@@ -110,12 +144,23 @@ function Inicio() {
         <Popup autoOpen={false} closeOnClick={false}>
           Local selecionado: <br />
           Rua: {enderecoPelaApi}
-
         </Popup>
       </Marker>
     ) : null;
   }
 
+  useEffect(() => {
+    console.log('cidadeselecionada: ', cidadeSelecionada)
+  }, [cidadeSelecionada])
+
+  const handleChangeCidade = (e) => {
+    const cidadeId = e.target.value;
+    const cidadeSelecionada = cidades.find(cidade => cidade.idCidade === parseInt(cidadeId));
+
+    if (cidadeSelecionada) {
+      setCidadeSelecionada(cidadeSelecionada.nomeCidade);
+    }
+  };
 
   return (
     <div className="App">
@@ -163,36 +208,45 @@ function Inicio() {
 
             <div id='div-endereco' style={{ marginBottom: '20px' }}>
               <label>Endereço de origem</label>
-              <select defaultValue={"Araruna"}>
-                <option value='Araruna'>Farmácia 1</option>
-                <option value='Campo Mourão'>Farmácia 2</option>
-                <option value='Cianorte'>Farmácia 3</option>
+              <select>
+                <option value="">Selecione</option>
+                {locais.map((local) => (
+                  <option key={local.idLocal} value={local.idLocal}>
+                    {local.nomeLocal}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div id='div-endereco' style={{ marginBottom: '20px' }}>
               <label>Endereço de destino</label>
-              <select onChange={(e) => setCidadeDigitada(e.target.value)}>
-                <option value='Araruna'>Araruna</option>
-                <option value='Campo Mourão'>Campo Mourão</option>
-                <option value='Cianorte'>Cianorte</option>
+              <select onChange={(e) => { handleChangeCidade(e) }}>
+                <option value="">Selecione</option>
+                {cidades.map((cidade) => (
+                  <option key={cidade.idCidade} value={cidade.idCidade}>
+                    {cidade.nomeCidade}
+                  </option>
+                ))}
               </select>
+
               <input
                 placeholder='Número'
                 type='number'
                 onChange={(e) => setNumeroDaCasa(e.target.value)}
               />
+
               <div style={{ display: 'flex', position: 'relative', width: '100%' }}>
                 <AutocompleteEndMapa
                   setEnderecoDigitado={setEnderecoDigitado}
                   enderecoDigitado={enderecoDigitado}
-                  cidade={cidadeDigitada}
+                  cidade={cidadeSelecionada}
                   numero={numeroDaCasa}
                   style={{ paddingRight: '30px', width: '100%' }}
                   removerMarcador={removerMarcador}
                   setPosicaoSelecionada={setPosicaoSelecionada}
                 />
               </div>
+
             </div>
 
             <div id='div-obs'>
@@ -234,6 +288,17 @@ function Inicio() {
           </MapContainer>
         </div>
       </div>
+
+      {
+        contextLoading ? (
+          <div>
+            <Loading message={estadoDaPagina === "Carregando" ? "Carregando..." : estadoDaPagina === "Atualizando" ? "Atualizando..." : estadoDaPagina === "Salvando" ? "Salvando..." : "Excluindo..."} />
+          </div>
+        ) : (
+          <></>
+        )
+      }
+
     </div>
   );
 }

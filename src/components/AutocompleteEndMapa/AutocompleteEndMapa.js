@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, numero, removerMarcador, setPosicaoSelecionada }) => {
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState([]);
-
     const fetchAddresses = async (query) => {
         try {
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?q=${query}&countrycodes=BR&format=json&addressdetails=1&limit=5`
             );
+            console.log("resposta: ", response)
 
             if (!response.ok) {
                 throw new Error('Erro ao buscar endereços');
@@ -18,9 +18,8 @@ const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, nu
             const data = await response.json();
             console.log('formattedSuggestions: ', data);
 
-            // formata os dados para conter apenas as informações desejadas
             const formattedSuggestions = data.map((address) => ({
-                display_name: `${address?.address?.road}, ${address?.address?.state}, ${address?.address?.country}`,
+                display_name: `${address?.address?.road || ''}, ${address?.address?.city || address?.address?.town || address?.address?.village || ''}, ${address?.address?.state || ''}, ${address?.address?.country || ''}`,
                 place_id: address.place_id,
                 latitude: address.lat,
                 longitude: address.lon
@@ -84,6 +83,7 @@ const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, nu
                 }}
                 onClick={() => {
                     removerMarcador();
+                    setInputValue("")
                 }}
             />
             {suggestions.length > 0 && (
