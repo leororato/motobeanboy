@@ -6,6 +6,7 @@ import SucessNotification from "../../components/SucessNotification/SucessNotifi
 import Loading from "../../components/Loading/Loading";
 import './CadastroLocaisServico.css'
 import axios from "axios";
+import ReactInputMask from "react-input-mask";
 
 function CadastroLocaisServico() {
 
@@ -31,6 +32,7 @@ function CadastroLocaisServico() {
             ...formDataNovoLocalDeServico,
             [name]: value
         })
+        console.log('form:', formDataNovoLocalDeServico)
     }
 
     useEffect(() => {
@@ -150,12 +152,25 @@ function CadastroLocaisServico() {
                                 <div id="div-local-input">
 
                                     <label>Cnpj:</label>
-                                    <input
+                                    {/* <input
                                         type="text"
+                                        mask="99.999.999/9999-99"
                                         placeholder="Digite o nome da cidade"
                                         value={formDataNovoLocalDeServico.cnpj}
                                         name="cnpj"
                                         onChange={handleChangeNovoLocal}
+                                        style={{
+                                            padding: '10px',
+                                            borderRadius: '5px',
+                                            border: '1px solid #ccc',
+                                        }}
+                                    /> */}
+                                    <ReactInputMask
+                                        mask="99.999.999/9999-99"
+                                        value={formDataNovoLocalDeServico.cnpj}
+                                        name="cnpj"
+                                        onChange={handleChangeNovoLocal}
+                                        placeholder="Digite o CNPJ"
                                         style={{
                                             padding: '10px',
                                             borderRadius: '5px',
