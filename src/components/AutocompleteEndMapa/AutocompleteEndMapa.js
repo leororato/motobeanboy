@@ -1,4 +1,5 @@
 import { Icon } from '@iconify/react';
+import { Autocomplete, Box, TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 
 const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, numero, removerMarcador, setPosicaoSelecionada }) => {
@@ -26,6 +27,7 @@ const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, nu
             }));
 
             setSuggestions(formattedSuggestions.length > 0 ? formattedSuggestions : []);
+            console.log('suggestions: ', suggestions)
         } catch (error) {
             console.error('Erro ao buscar endereços:', error);
             setSuggestions([]);
@@ -45,33 +47,40 @@ const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, nu
         return () => clearTimeout(handleSearch);
     }, [inputValue, cidade, numero]);
 
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
+    const handleSuggestionClick = (address) => {
+        if (address.latitude && address.longitude) {
+            setInputValue(address.display_name);
+            setEnderecoDigitado(address.display_name);
+            setSuggestions([]);
+            setPosicaoSelecionada({
+                lat: parseFloat(address.latitude),
+                lng: parseFloat(address.longitude),
+            });
+        } else {
+            console.error('Coordenadas inválidas:', address);
+        }
     };
 
-    const handleSuggestionClick = (address) => {
-        setInputValue(address.display_name);
-        setEnderecoDigitado(address.display_name);
-        setSuggestions([]);
-        setPosicaoSelecionada({
-            lat: address.latitude,
-            lng: address.longitude
-        })
-    };
 
     return (
-        <div style={{ display: 'flex', position: 'relative', width: '100%' }}>
-            <input
-                type="text"
-                value={inputValue || enderecoDigitado}
-                onChange={handleInputChange}
-                placeholder="Rua"
-                style={{
-                    width: '100%',
-                    paddingRight: '40px',
-                    boxSizing: 'border-box',
+        <Box>
+            <Autocomplete
+                options={suggestions}
+                getOptionLabel={(option) => option.display_name || ''}
+                inputValue={inputValue}
+                onInputChange={(event, newInputValue) => {
+                    setInputValue(newInputValue);
                 }}
+                onChange={(event, newValue) => {
+                    if (newValue) {
+                        handleSuggestionClick(newValue);
+                    }
+                }}
+                renderInput={(params) => (
+                    <TextField {...params} label="Endereço" variant="standard" />
+                )}
             />
+           
             <Icon
                 icon="mdi:reload"
                 style={{
@@ -129,7 +138,7 @@ const AutocompleteEndMapa = ({ setEnderecoDigitado, enderecoDigitado, cidade, nu
             )}
 
 
-        </div>
+        </Box>
     );
 };
 

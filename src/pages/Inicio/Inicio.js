@@ -1,16 +1,17 @@
-import './Inicio.css';
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L, { latLng } from 'leaflet';
-import { Icon } from '@iconify/react/dist/iconify.js';
 import Cookies from 'js-cookie';
 import AutocompleteEndMapa from '../../components/AutocompleteEndMapa/AutocompleteEndMapa';
-import Header from '../../components/Header/Header';
 import api from '../../axiosConfig';
 import ErrorNotification from '../../components/ErrorNotification/ErrorNotification';
 import SucessNotification from '../../components/SucessNotification/SucessNotification';
 import Loading from '../../components/Loading/Loading';
+import { Autocomplete, Box, Button, TextField } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import MenuAppBar from '../../components/AppBar/AppBar';
+
 
 // Corrigir o ícone padrão do Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -25,11 +26,15 @@ function Inicio() {
   const [contextLoading, setContextLoading] = useState(false);
   const [estadoDaPagina, setEstadoDaPagina] = useState("Carregando");
 
+  const [inputTipoDeVeiculoValue, setInputTipoDeVeiculoValue] = useState("");
+  const [inputEnderecoDeOrigemValue, setInputEnderecoDeOrigemValue] = useState("");
+  const [inputEnderecoDeDestinoValue, setInputEnderecoDeDestinoValue] = useState("");
+  const [inputNumeroDaCasaValue, setInputNumeroDaCasaValue] = useState("");
+
   const [cidadeSelecionada, setCidadeSelecionada] = useState("");
   const [posicaoSelecionada, setPosicaoSelecionada] = useState(null);
   const [enderecoPelaApi, setEnderecoPelaApi] = useState("");
   const [enderecoDigitado, setEnderecoDigitado] = useState("");
-  const [enderecoInput, setEnderecoInput] = useState("");
   const [numeroDaCasa, setNumeroDaCasa] = useState("");
 
   const [locais, setLocais] = useState([]);
@@ -44,7 +49,7 @@ function Inicio() {
     try {
       const response = await api.get("/tipo-veiculo/todos");
       setTiposDeVeiculo(response.data);
-
+      console.log('tipos de veiculo: ', response.data)
     } catch (error) {
       const errorMessage = error.response?.data || "Erro desconhecido ao criar usuário";
       setErrorMessage(errorMessage);
@@ -80,6 +85,9 @@ function Inicio() {
   }
 
   useEffect(() => {
+
+    console.log('input: ', inputTipoDeVeiculoValue)
+
     buscarTiposDeVeiculo();
     buscarCidades();
     buscarLocaisExistentes();
@@ -163,143 +171,130 @@ function Inicio() {
   };
 
   return (
-    <div className="App">
-      <Header />
-      <ErrorNotification message={errorMessage} onClose={() => { setErrorMessage(null) }} />
-      <SucessNotification message={sucessMessage} onClose={() => { setSucessMessage(null) }} />
+    <Box sx={{ textAlign: 'center', width: '100%' }}>
+      <MenuAppBar />
+      <ErrorNotification message={errorMessage} onClose={() => setErrorMessage(null)} />
+      <SucessNotification message={sucessMessage} onClose={() => setSucessMessage(null)} />
 
-      <div className="container-page">
-        <div className="container-inputs">
-          {/* <div id='title'>
-            <h1>MotoBeanBoy</h1>
-          </div> */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          height: '100vh',
+          paddingTop: '60px',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: '#F8F8F8',
+            width: { xs: '100%', md: '700px' },
+            boxShadow: 3,
+            zIndex: 100,
+            padding: 2,
+            gap: 2,
+          }}
+        >
+          <Autocomplete
+            options={tiposDeVeiculo}
+            getOptionLabel={(option) => option.descricao || 'Pesquisar'}
+            value={inputTipoDeVeiculoValue || ''}
+            onChange={(event, newValue) => setInputTipoDeVeiculoValue(newValue || '')}
+            renderInput={(params) => <TextField {...params} label="Tipos de Veículo *" />}
+            sx={{ marginBottom: 2 }}
+          />
 
-          <div className='subcontainer-inputs'>
-            <div id='div-servico-adicional' style={{ marginBottom: '20px' }}>
-              <label>Serviço adicional</label>
-              <select>
-                <option>Selecione</option>
-                <option selected>SERVIÇO DE ENTREGA NORMAL | R$ 0,00"</option>
-              </select>
-            </div>
+          <Autocomplete
+            options={locais}
+            getOptionLabel={(option) => option.nomeLocal || 'Pesquisar'}
+            value={inputEnderecoDeOrigemValue || ''}
+            onChange={(event, newValue) => setInputEnderecoDeOrigemValue(newValue || '')}
+            renderInput={(params) => <TextField {...params} label="Endereço de Origem *" />}
+            sx={{ marginBottom: 2 }}
+          />
 
-            <div id='div-veiculo-retorno' style={{ marginBottom: '20px' }}>
-              <div>
-                <label>Veículo</label>
-                <select>
-                  <option value="">Selecione</option>
-                  {tiposDeVeiculo.map((tipo) => (
-                    <option key={tipo.id} value={tipo.id}>
-                      {tipo.descricao}
-                    </option>
-                  ))}
-                </select>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Autocomplete
+              options={cidades}
+              getOptionLabel={(option) => option.nomeCidade || 'Pesquisar'}
+              value={inputEnderecoDeDestinoValue || ''}
+              onChange={(event, newValue) => setInputEnderecoDeDestinoValue(newValue || '')}
+              renderInput={(params) => <TextField {...params} label="Endereço de Destino *" />}
+            />
 
-              </div>
+            <TextField
+              label="Número"
+              variant="outlined"
+              type="text"
+              onChange={(e) => setNumeroDaCasa(e.target.value)}
+            />
 
-              <div>
-                <label>Retorno</label>
-                <select defaultValue={false}>
-                  <option value={false}>NÃO</option>
-                  <option value={true}>SIM</option>
-                </select>
-              </div>
-            </div>
+            <AutocompleteEndMapa
+              setEnderecoDigitado={setEnderecoDigitado}
+              enderecoDigitado={enderecoDigitado}
+              cidade={cidadeSelecionada}
+              numero={numeroDaCasa}
+              removerMarcador={removerMarcador}
+              setPosicaoSelecionada={setPosicaoSelecionada}
+            />
+          </Box>
 
-            <div id='div-endereco' style={{ marginBottom: '20px' }}>
-              <label>Endereço de origem</label>
-              <select>
-                <option value="">Selecione</option>
-                {locais.map((local) => (
-                  <option key={local.idLocal} value={local.idLocal}>
-                    {local.nomeLocal}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <TextField
+            label="Observações"
+            placeholder="Se tiver alguma informação para nos falar, digite aqui..."
+            multiline
+            variant="filled"
+            sx={{ marginTop: 2 }}
+          />
 
-            <div id='div-endereco' style={{ marginBottom: '20px' }}>
-              <label>Endereço de destino</label>
-              <select onChange={(e) => { handleChangeCidade(e) }}>
-                <option value="">Selecione</option>
-                {cidades.map((cidade) => (
-                  <option key={cidade.idCidade} value={cidade.idCidade}>
-                    {cidade.nomeCidade}
-                  </option>
-                ))}
-              </select>
+          <Button
+            variant="contained"
+            endIcon={<SendIcon />}
+            sx={{ marginTop: 2, backgroundColor: '#1976d2' }}
+          >
+            SOLICITAR COLETA
+          </Button>
+        </Box>
 
-              <input
-                placeholder='Número'
-                type='number'
-                onChange={(e) => setNumeroDaCasa(e.target.value)}
-              />
-
-              <div style={{ display: 'flex', position: 'relative', width: '100%' }}>
-                <AutocompleteEndMapa
-                  setEnderecoDigitado={setEnderecoDigitado}
-                  enderecoDigitado={enderecoDigitado}
-                  cidade={cidadeSelecionada}
-                  numero={numeroDaCasa}
-                  style={{ paddingRight: '30px', width: '100%' }}
-                  removerMarcador={removerMarcador}
-                  setPosicaoSelecionada={setPosicaoSelecionada}
-                />
-              </div>
-
-            </div>
-
-            <div id='div-obs'>
-              <label>Observações</label>
-              <textarea placeholder='Se tiver alguma informação para nos falar digite aqui...' />
-            </div>
-
-            <div id='div-status-tempo'>
-              <div>
-                <p>Tempo Coleta: 30 minutos</p>
-                <p>Tempo Entrega: 30 minutos</p>
-                <p>Distância: 0,0 km</p>
-              </div>
-              <div id='div-total-solicitacao'>
-                <p>Total:</p>
-                <p>R$ 0,00</p>
-              </div>
-            </div>
-
-            <div id='div-botao-solicitar'>
-              <button>SOLICITAR COLETA</button>
-            </div>
-
-
-          </div>
-        </div>
-
-        <div className="container-map">
+        <Box
+          sx={{
+            flexGrow: 1,
+            backgroundColor: '#ccc',
+            height: '100%',
+            zIndex: 10,
+          }}
+        >
           <MapContainer
             center={[-23.930158615112305, -52.4966926574707]}
             zoom={16}
             className="leaflet-container"
+            style={{ height: '100%', width: '100%' }}
             attributionControl={true}
           >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <ValorDoMarcador />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {/* Supondo que ValorDoMarcador seja um componente válido */}
+            {posicaoSelecionada && <ValorDoMarcador position={posicaoSelecionada} />}
           </MapContainer>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {
-        contextLoading ? (
-          <div>
-            <Loading message={estadoDaPagina === "Carregando" ? "Carregando..." : estadoDaPagina === "Atualizando" ? "Atualizando..." : estadoDaPagina === "Salvando" ? "Salvando..." : "Excluindo..."} />
-          </div>
-        ) : (
-          <></>
-        )
-      }
-
-    </div>
+      {contextLoading && (
+        <Box>
+          <Loading
+            message={
+              estadoDaPagina === 'Carregando'
+                ? 'Carregando...'
+                : estadoDaPagina === 'Atualizando'
+                  ? 'Atualizando...'
+                  : estadoDaPagina === 'Salvando'
+                    ? 'Salvando...'
+                    : 'Excluindo...'
+            }
+          />
+        </Box>
+      )}
+    </Box>
   );
 }
 
